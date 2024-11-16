@@ -1,15 +1,21 @@
+
 #include "raylib.h"
 
-int main(){
-  InitWindow(800, 450, "raylib [core] example - basic window");
+int main()
+{
+  int windowHeight = 700;
+  int windowWidgth = 750;
 
-  while (!WindowShouldClose()){
+  InitWindow(windowWidgth, windowHeight, "Space Invaders C++");
+  SetTargetFPS(60);
+
+  while (WindowShouldClose() == false)
+  {
     BeginDrawing();
-    ClearBackground(RAYWHITE);
-    DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
-    EndDrawing();
+    EndDrawing();  
   }
+  
+
 
   CloseWindow();
-  return 0;
 }

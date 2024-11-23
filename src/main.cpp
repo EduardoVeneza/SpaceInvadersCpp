@@ -1,5 +1,5 @@
 #include "raylib.h"
-#include "Spaceship.hpp"
+#include "game.hpp"
 
 int main()
 {
@@ -11,13 +11,17 @@ int main()
 
 
 
-  Spaceship Spaceship;
+  Game game;
   while (WindowShouldClose() == false)
   {
+
+    
     BeginDrawing();
     ClearBackground(grey);
 
-    Spaceship.draw();
+    game.handleImput();
+    game.update();
+    game.draw();
 
 
 

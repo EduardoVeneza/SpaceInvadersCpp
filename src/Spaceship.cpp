@@ -2,6 +2,7 @@
 
 
 Spaceship::Spaceship(){
+    
     SpaceshipTexture = LoadTexture("Graphics/spaceship.png");
     position.x = (GetScreenWidth() - SpaceshipTexture.width)/2;
     position.y = GetScreenHeight() - SpaceshipTexture.height;

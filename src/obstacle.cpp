@@ -45,5 +45,5 @@ void obstacle::draw()
     {
         block.draw();
     }
-    
+
 }

@@ -9,7 +9,7 @@ int main()
   InitWindow(windowWidth, windowHeight, "Space Invaders C++");
   SetTargetFPS(60);
 
-
+  
   Game game;
   while (WindowShouldClose() == false)
   {
@@ -20,7 +20,7 @@ int main()
     game.handleImput();
     game.update();
     game.draw();
-
+    
 
 
     EndDrawing();  

@@ -10,6 +10,7 @@ class Alien {
         static void unloadAliens();
         static Texture2D alienTexture[3];
         Vector2 alienPosition;
+        Rectangle getRectangle();
         int tipo;
     private:
 };

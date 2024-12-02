@@ -9,6 +9,7 @@ public:
     void update();
     void draw();
     bool active;
+    Rectangle getRectangle();
 
 private:
     Vector2 laserPosition;

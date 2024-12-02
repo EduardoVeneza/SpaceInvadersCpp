@@ -2,10 +2,7 @@
 #include <iostream>
 Game::Game()
 {
-    obstacles = create_obstacle();
-    Aliens = create_aliens();
-    alienDirection = 1;
-    timeLastAlienFired = 0.0;
+    InitGame();
 }
 
 Game::~Game()
@@ -15,22 +12,39 @@ Game::~Game()
 
 void Game::update()
 {
-    for(auto& laser: spaceship.lasers)
-    {
-        laser.update();
-    }
-    deleteInactiveLasers();
-
-    moveAliens();
-
-    alienShootLaser();
-
-    for (auto& laser : alienLasers)
-    {
-        laser.update();
-    }
     
+    if(isRunning){
+        double currentTime = GetTime();
+        if (currentTime - lastMysteryShipSpawn > mysteryShipSpawnInterval)
+        {
+            mysteryship.spawn();
+            lastMysteryShipSpawn = GetTime();
+            mysteryShipSpawnInterval = GetRandomValue(10, 20);
+        }
 
+        for(auto& laser: spaceship.lasers)
+        {
+            laser.update();
+        }
+        deleteInactiveLasers();
+
+        moveAliens();
+
+        alienShootLaser();
+
+        for (auto& laser : alienLasers)
+        {
+            laser.update();
+        }
+        mysteryship.update();
+        checkForCollision();
+    } else {
+        if (IsKeyDown(KEY_ENTER))
+        {
+            resetGame();
+        }
+        
+    }
 }
 
 void Game::draw()
@@ -56,21 +70,26 @@ void Game::draw()
     {
         laser.draw();
     }
+    mysteryship.draw();
 }
 
 void Game::handleImput()
 {
-    if (IsKeyDown(KEY_LEFT))
+    if (isRunning)
     {
-        spaceship.moveLeft();
-    } else if (IsKeyDown(KEY_RIGHT))
-    {
-        spaceship.moveRight();
-    } else if(IsKeyDown(KEY_SPACE))
-    {
-        spaceship.fireLaser();
-    }
-    
+        if (IsKeyDown(KEY_LEFT))
+        {
+            spaceship.moveLeft();
+        } 
+        else if (IsKeyDown(KEY_RIGHT))
+        {
+            spaceship.moveRight();
+        } 
+        else if(IsKeyDown(KEY_SPACE))
+        {
+            spaceship.fireLaser();
+        }
+    }    
 }
 
 void Game::deleteInactiveLasers()
@@ -107,7 +126,7 @@ std::vector<obstacle> Game::create_obstacle()
     for (int i = 0; i < ObstacleQTD; i++)
     {
         float offsetX = (i+1) * gap + i * obstacleWidth;
-        obstacles.push_back(obstacle({offsetX, float(GetScreenHeight() - 100)}));
+        obstacles.push_back(obstacle({offsetX, float(GetScreenHeight() - 100) - 100}));
     }
     return obstacles;
 }
@@ -142,12 +161,12 @@ void Game::moveAliens()
 {
     for (auto& alien: Aliens)
     {
-        if (alien.alienPosition.x + alien.alienTexture[alien.tipo - 1].width > GetScreenWidth())
+        if (alien.alienPosition.x + alien.alienTexture[alien.tipo - 1].width > GetScreenWidth() - 15)
         {
             moveAliensDown(5);
             alienDirection = -1;
         }
-        if (alien.alienPosition.x < 0)
+        if (alien.alienPosition.x < 15)
         {
             moveAliensDown(5);
             alienDirection = 1;
@@ -156,6 +175,12 @@ void Game::moveAliens()
         alien.update(alienDirection);
     }
     
+}
+
+void Game::gameover()
+{
+    std::cout << "Game Over" << std::endl;
+    isRunning = false;
 }
 
 void Game::moveAliensDown(int down)
@@ -177,4 +202,112 @@ void Game::alienShootLaser()
                                 alienptr.alienPosition.y + alienptr.alienTexture[alienptr.tipo - 1].height}, 6));
     timeLastAlienFired = GetTime();
 }
+}
+
+void Game::checkForCollision()
+{
+    for (auto& laser: spaceship.lasers)
+    {
+        auto it = Aliens.begin();
+        while (it != Aliens.end())
+        {
+            if (CheckCollisionRecs(it -> getRectangle(), laser.getRectangle()))
+            {
+                it = Aliens.erase(it);
+                laser.active = false;
+            }
+            else {
+                it++;
+            }
+            
+        }
+        
+        for (auto& obstacle : obstacles)
+        {
+            auto it = obstacle.blocks.begin();
+            while (it != obstacle.blocks.end()){
+                if (CheckCollisionRecs(it->getRectangle(), laser.getRectangle()))
+                {
+                    it = obstacle.blocks.erase(it);
+                    laser.active = false;
+                } else {
+                    it++;
+                }
+            }
+        }
+        if (CheckCollisionRecs(mysteryship.getRectangle(), laser.getRectangle()))
+        {
+            mysteryship.alive = false;
+            laser.active = false;
+        }
+        
+    }
+    for (auto& alienlaser : alienLasers)
+    {
+        if (CheckCollisionRecs(alienlaser.getRectangle(), spaceship.getRectangle()))
+        {
+            alienlaser.active = false;
+            lifes--;
+            if (lifes == 0)
+            {
+                gameover();
+            }
+            
+        }
+        
+        for (auto& obstacle : obstacles)
+        {
+            auto it = obstacle.blocks.begin();
+            while (it != obstacle.blocks.end()){
+                if (CheckCollisionRecs(it->getRectangle(), alienlaser.getRectangle()))
+                {
+                    it = obstacle.blocks.erase(it);
+                    alienlaser.active = false;
+                } else {
+                    it++;
+                }
+            }
+        }
+    }
+    for (auto& alien : Aliens)
+    {
+        for (auto& obstacle : obstacles)
+        {
+            auto it = obstacle.blocks.begin();
+            while (it != obstacle.blocks.end())
+            {
+                if (CheckCollisionRecs(it->getRectangle(), alien.getRectangle()))
+                {
+                    it = obstacle.blocks.erase(it);
+                } else {
+                    it++;
+                }
+            }
+            
+            
+        }
+        
+    }
+       
+}
+
+void Game::resetGame()
+{
+    spaceship.resetSpaceship();
+    Aliens.clear();
+    obstacles.clear();
+    alienLasers.clear();
+    InitGame();
+}
+
+void Game::InitGame()
+{
+    obstacles = create_obstacle();
+    Aliens = create_aliens();
+    alienDirection = 1;
+    timeLastAlienFired = 0.0;
+    lastMysteryShipSpawn = 0.0;
+    mysteryShipSpawnInterval = GetRandomValue(10, 20);
+    lifes = 3;
+    isRunning = true;
 }

@@ -7,6 +7,8 @@ class block
         block(Vector2 blockPosition);
         // ~block();
         void draw();
+        Rectangle getRectangle();
+
     private:
         Vector2 blockPosition;
 };

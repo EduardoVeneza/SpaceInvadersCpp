@@ -48,3 +48,11 @@ void Alien::unloadAliens()
     }
     
 }
+
+Rectangle Alien::getRectangle()
+{
+    return {alienPosition.x, alienPosition.y,
+    float(alienTexture[tipo - 1].width),
+    float(alienTexture[tipo - 1].height)
+    };
+}

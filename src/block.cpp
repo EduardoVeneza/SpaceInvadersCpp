@@ -9,3 +9,8 @@ void block::draw()
 {  
     DrawRectangle(blockPosition.x, blockPosition.y, 3, 3, {243, 216, 63, 255});
 }
+
+Rectangle block::getRectangle()
+{
+    return {blockPosition.x, blockPosition.y, 3, 3};
+}

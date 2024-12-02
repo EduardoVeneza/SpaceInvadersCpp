@@ -11,8 +11,10 @@ public:
     void moveRight();
     void moveLeft();
     void fireLaser();
+    void resetSpaceship();
+    Rectangle getRectangle();
     std::vector<Laser> lasers;
-
+    Texture2D getSpaceshipTexture();
 private:
     Texture2D SpaceshipTexture;
     Vector2 position;

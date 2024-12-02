@@ -5,7 +5,7 @@ Spaceship::Spaceship(){
     
     SpaceshipTexture = LoadTexture("Graphics/spaceship.png");
     position.x = (GetScreenWidth() - SpaceshipTexture.width)/2;
-    position.y = GetScreenHeight() - SpaceshipTexture.height;
+    position.y = GetScreenHeight() - SpaceshipTexture.height - 100;
 
     lastShoot = 0.0;
 }
@@ -21,18 +21,18 @@ void Spaceship::draw(){
 void Spaceship::moveLeft(){
 
     position.x -= 7;
-    if (position.x < 0)
+    if (position.x < 0 + 14)
     {
-        position.x = 0;
+        position.x = 0 + 14;
     }
     
 }
 
 void Spaceship::moveRight(){
     position.x += 7;
-    if (position.x > GetScreenWidth() - SpaceshipTexture.width)
+    if (position.x > GetScreenWidth() - SpaceshipTexture.width - 14)
     {
-        position.x = GetScreenWidth() - SpaceshipTexture.width;
+        position.x = GetScreenWidth() - SpaceshipTexture.width - 14;
     }
 }
 
@@ -40,8 +40,24 @@ void Spaceship::fireLaser()
 {
     if (GetTime() - lastShoot >= 0.35)
     {
-        lasers.push_back(Laser({position.x + SpaceshipTexture.width/2 - 2, position.y} ,-6));    
+        lasers.push_back(Laser({position.x + SpaceshipTexture.width/2 - 2, position.y} ,-10));    
         lastShoot = GetTime();
     }
     
+}
+
+void Spaceship::resetSpaceship()
+{
+    position.x = (GetScreenWidth() - SpaceshipTexture.width)/2.0f;
+    position.y = GetScreenHeight() - SpaceshipTexture.height - 100;
+}
+
+Rectangle Spaceship::getRectangle()
+{
+    return {position.x, position.y, float(SpaceshipTexture.width), float(SpaceshipTexture.height)};
+}
+
+Texture2D Spaceship::getSpaceshipTexture()
+{
+    return SpaceshipTexture;
 }

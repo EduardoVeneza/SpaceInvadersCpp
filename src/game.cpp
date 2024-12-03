@@ -2,12 +2,16 @@
 #include <iostream>
 Game::Game()
 {
+    InitSounds();
     InitGame();
 }
 
 Game::~Game()
 {
     Alien::unloadAliens();
+    UnloadMusicStream(music);
+    UnloadSound(explosionSound);
+    UnloadSound(laserShootSound);   
 }
 
 void Game::update()
@@ -74,9 +78,10 @@ void Game::draw()
 }
 
 void Game::handleImput()
-{
+{   //Verifica se o jogo está rodando
     if (isRunning)
     {
+        //Verifica se as teclas LEFT, RIGHT, SPACE estão sendo pressionadas (a cada frame), e chama as funções respectivas
         if (IsKeyDown(KEY_LEFT))
         {
             spaceship.moveLeft();
@@ -87,9 +92,48 @@ void Game::handleImput()
         } 
         else if(IsKeyDown(KEY_SPACE))
         {
-            spaceship.fireLaser();
+            spaceship.fireLaser(laserShootSound);
         }
     }    
+}
+
+
+
+void Game::drawInterface(Font gameFont, Color color)
+{
+    // UpdateMusicStream(music);
+    //Desenha os FPS 
+    // DrawFPS(GetScreenWidth()/2 - 50, 40);
+
+    //Desenha a caixa aonde se passa o jogo
+    DrawRectangleRoundedLines({10,10,780,780}, 0.18f, 20, color);
+
+    //Desenha a linha que divide interface de jogo
+    DrawLineEx({10, 730}, {790,730}, 3, color);
+    
+    //Verifica se o jogo ainda está rodando, se houver game over, indique ao jogador
+    if (isRunning)
+    {
+      DrawTextEx(gameFont, "LEVEL 01", {570, 740}, 34, 2, color);
+      
+    } else {
+      DrawTextEx(gameFont, "GAME OVER (PRESS ENTER TO RESET)", {140, 740}, 34, 2, color);
+    }
+    //Desenha as vidas, e subtrai uma sempre que a nave for atingida
+    float x = 60.0f;
+    for (int i = 0; i < lifes; i++)
+    {
+      DrawTextureV(spaceship.getSpaceshipTexture(), {x, 755}, WHITE);
+      x += 50;
+    }
+
+    //Desenha o score, ultiliza "TextFormat()" para converter o INT em STRING
+    DrawTextEx(gameFont, TextFormat("Score: %d", score), {600, 40}, 30, 3, color);
+}
+
+void Game::showMenu(Font menuFont, Color menuColor)
+{
+    DrawTextEx(menuFont, "SPACE-INVADERS", {300, 100}, 50, 3, menuColor);   
 }
 
 void Game::deleteInactiveLasers()
@@ -157,6 +201,19 @@ std::vector<Alien> Game::create_aliens()
     return Aliens;
 }
 
+void Game::InitSounds()
+{
+    music = LoadMusicStream("Sound/music.ogg");
+    explosionSound = LoadSound("Sound/explosion.ogg");
+    laserShootSound = LoadSound("Sound/laser.ogg"); 
+    PlayMusicStream(music);
+}
+
+void Game::addScore(int value)
+{
+    this->score += value;
+}
+
 void Game::moveAliens()
 {
     for (auto& alien: Aliens)
@@ -179,7 +236,6 @@ void Game::moveAliens()
 
 void Game::gameover()
 {
-    std::cout << "Game Over" << std::endl;
     isRunning = false;
 }
 
@@ -196,24 +252,43 @@ void Game::alienShootLaser()
 {
     double currentTime = GetTime();
     if (currentTime - timeLastAlienFired >= alienShootTime && !Aliens.empty()){
-    int randomIdexValue = GetRandomValue(0, Aliens.size() - 1);
-    Alien& alienptr = Aliens[randomIdexValue];
-    alienLasers.push_back(Laser({alienptr.alienPosition.x + alienptr.alienTexture[alienptr.tipo - 1].width/2, 
-                                alienptr.alienPosition.y + alienptr.alienTexture[alienptr.tipo - 1].height}, 6));
-    timeLastAlienFired = GetTime();
+        int randomIdexValue = GetRandomValue(0, Aliens.size() - 1);
+        Alien& alienptr = Aliens[randomIdexValue];
+        alienLasers.push_back(Laser({alienptr.alienPosition.x + alienptr.alienTexture[alienptr.tipo - 1].width/2, 
+                                    alienptr.alienPosition.y + alienptr.alienTexture[alienptr.tipo - 1].height}, 6));
+        timeLastAlienFired = GetTime();
 }
 }
 
 void Game::checkForCollision()
 {
+    //Checa colisão entre: Spaceship Laser e Alien
     for (auto& laser: spaceship.lasers)
     {
         auto it = Aliens.begin();
+        
         while (it != Aliens.end())
         {
             if (CheckCollisionRecs(it -> getRectangle(), laser.getRectangle()))
             {
+                if (it->getTipo() == 1)
+                {
+                    std::cout << "Alien Tipo 1, pontos -> 100" << std::endl; 
+                    addScore(100);
+                } 
+                else if(it->getTipo() == 2)
+                {
+                    std::cout << "Alien Tipo 2, pontos -> 200" << std::endl;
+                    addScore(200);
+                } 
+                else if (it->getTipo() == 3)
+                {
+                    std::cout << "Alien Tipo 3, pontos -> 300" << std::endl;
+                    addScore(300);
+                }
                 it = Aliens.erase(it);
+                PlaySound(explosionSound);
+                
                 laser.active = false;
             }
             else {
@@ -222,6 +297,7 @@ void Game::checkForCollision()
             
         }
         
+        //Checa colisão entre: Spaceship Laser e Obstacle
         for (auto& obstacle : obstacles)
         {
             auto it = obstacle.blocks.begin();
@@ -235,15 +311,19 @@ void Game::checkForCollision()
                 }
             }
         }
+        //Checa colisão entre: Spaceship Laser e MysteryShip
         if (CheckCollisionRecs(mysteryship.getRectangle(), laser.getRectangle()))
         {
             mysteryship.alive = false;
+            PlaySound(explosionSound);
+            addScore(500);
             laser.active = false;
         }
         
     }
     for (auto& alienlaser : alienLasers)
     {
+        //Checa colisão entre: Alien Laser e Spaceship
         if (CheckCollisionRecs(alienlaser.getRectangle(), spaceship.getRectangle()))
         {
             alienlaser.active = false;
@@ -254,7 +334,7 @@ void Game::checkForCollision()
             }
             
         }
-        
+        //Checa colisão entre: Alien Laser e obstacle
         for (auto& obstacle : obstacles)
         {
             auto it = obstacle.blocks.begin();
@@ -269,6 +349,7 @@ void Game::checkForCollision()
             }
         }
     }
+    //Checa colisão entre: Os próprios aliens, e obstacle
     for (auto& alien : Aliens)
     {
         for (auto& obstacle : obstacles)
@@ -310,4 +391,5 @@ void Game::InitGame()
     mysteryShipSpawnInterval = GetRandomValue(10, 20);
     lifes = 3;
     isRunning = true;
+    score = 0;
 }

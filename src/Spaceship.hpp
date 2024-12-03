@@ -10,7 +10,7 @@ public:
     void draw(); 
     void moveRight();
     void moveLeft();
-    void fireLaser();
+    void fireLaser(Sound laserShootSound);
     void resetSpaceship();
     Rectangle getRectangle();
     std::vector<Laser> lasers;

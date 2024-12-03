@@ -9,41 +9,42 @@ int main()
   int windowHeight = 700;
   int windowWidth = 750;
   InitWindow(windowWidth + offset, windowHeight + 2 * offset, "Space Invaders C++");
+  InitAudioDevice();
   SetTargetFPS(60);
   Font gameFont = LoadFontEx("fonts/monogram.ttf", 64, 0, 0);
-  
+  bool isInMenu = true;
+
+
   Game game;
   while (WindowShouldClose() == false)
   {
 
+    UpdateMusicStream(game.music);
+
+    // if (isInMenu)
+    // {
+    //   game.showMenu(gameFont, yellow);
+    // } 
+    
+
     game.handleImput();
     game.update();
-    
+      
     BeginDrawing();
     ClearBackground(grey);
-    DrawRectangleRoundedLines({10,10,780,780}, 0.18f, 20, yellow);
-    DrawLineEx({10, 730}, {790,730}, 3, yellow);
-
-    if (game.isRunning)
-    {
-      DrawTextEx(gameFont, "LEVEL 01", {570, 740}, 34, 2, yellow);
-    } else {
-      DrawTextEx(gameFont, "GAME OVER (PRESS ENTER TO RESET)", {140, 740}, 34, 2, yellow);
-    }
-
-    float x = 60.0f;
-    for (int i = 0; i < game.lifes; i++)
-    {
-      DrawTextureV(game.spaceship.getSpaceshipTexture(), {x, 755}, WHITE);
-      x += 50;
-    }
-    
-    
-
-
+      
+    game.drawInterface(gameFont, yellow);
     game.draw();
 
+
     EndDrawing();  
+
+    
+    
+
+
+
+
   }
   
 

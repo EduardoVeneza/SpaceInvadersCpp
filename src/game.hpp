@@ -11,17 +11,24 @@ class Game {
     ~Game();
     void update();
     void draw();
+    void drawInterface(Font gameFont, Color color);
+    void showMenu(Font menuFont, Color menuColor);
     void handleImput();
     void deleteInactiveLasers();
     bool isRunning;
     int lifes;
-    Spaceship spaceship;
+    int score;
+    Music music;
+    
 
     private:
+        Spaceship spaceship;
         int ObstacleQTD = 4;
         mysteryShip mysteryship;
         std::vector<obstacle> create_obstacle();
         std::vector<Alien> create_aliens();
+        void InitSounds();
+        void addScore(int value);
         void moveAliens();
         void gameover();
         void moveAliensDown(int down);
@@ -37,4 +44,6 @@ class Game {
         float timeLastAlienFired;
         float mysteryShipSpawnInterval;
         float lastMysteryShipSpawn;
+        Sound explosionSound;
+        Sound laserShootSound;
 };

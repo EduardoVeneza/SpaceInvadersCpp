@@ -4,7 +4,7 @@
 int main()
 {
   Color grey = {29, 29, 27, 255};
-  Color yellow = {243, 216, 63, 255};
+  // Color yellow = {243, 216, 63, 255};
   int offset = 50;
   int windowHeight = 700;
   int windowWidth = 750;
@@ -12,42 +12,30 @@ int main()
   InitAudioDevice();
   SetTargetFPS(60);
   Font gameFont = LoadFontEx("fonts/monogram.ttf", 64, 0, 0);
-  bool isInMenu = true;
 
-
-  Game game;
+  Game game(gameFont, YELLOW);
   while (WindowShouldClose() == false)
   {
-
     UpdateMusicStream(game.music);
 
-    // if (isInMenu)
-    // {
-    //   game.showMenu(gameFont, yellow);
-    // } 
-    
-
-    game.handleImput();
-    game.update();
-      
     BeginDrawing();
+
     ClearBackground(grey);
-      
-    game.drawInterface(gameFont, yellow);
-    game.draw();
+    game.handleImput();
 
+    if (game.isInMenu)
+    {
+      game.showMenu();
+    }
+    else
+    {
+      game.update();
+      game.drawInterface();
+      game.draw();
+    }
 
-    EndDrawing();  
-
-    
-    
-
-
-
-
+    EndDrawing();
   }
-  
-
 
   CloseWindow();
 }

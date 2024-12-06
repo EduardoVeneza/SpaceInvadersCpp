@@ -7,21 +7,26 @@
 
 class Game {
     public:
-    Game();
+    Game(Font gameFont, Color gameColor);
     ~Game();
     void update();
     void draw();
-    void drawInterface(Font gameFont, Color color);
-    void showMenu(Font menuFont, Color menuColor);
+    void drawInterface();
+    void showMenu();
     void handleImput();
     void deleteInactiveLasers();
     bool isRunning;
     int lifes;
     int score;
     Music music;
-    
+    bool isInMenu;
+    bool isInOptions;
 
     private:
+        bool soundIsOn;
+        float lastSoundTime = 0.0;
+        Font gameFont;
+        Color gameColor;
         Spaceship spaceship;
         int ObstacleQTD = 4;
         mysteryShip mysteryship;

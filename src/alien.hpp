@@ -7,6 +7,7 @@ class Alien {
         void draw();
         void update(int direction);
         int getTipo();
+        void deleteAlien();
         static void unloadAliens();
         static Texture2D alienTexture[3];
         Vector2 alienPosition;

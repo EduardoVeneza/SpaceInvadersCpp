@@ -3,6 +3,7 @@
 #include "obstacle.hpp"
 #include "alien.hpp"
 #include "mysteryShip.hpp"
+#include <string>
 
 
 class Game {
@@ -21,8 +22,14 @@ class Game {
     Music music;
     bool isInMenu;
     bool isInOptions;
-
+    bool isInAddPlayer;
+    typedef struct {
+        std::string Name;
+        int highScore;
+    } player;
+    
     private:
+    
         bool soundIsOn;
         float lastSoundTime = 0.0;
         Font gameFont;

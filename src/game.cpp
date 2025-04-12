@@ -1,5 +1,6 @@
 #include "game.hpp"
 #include <iostream>
+
 Game::Game(Font gameFont, Color gameColor)
 {
     InitSounds();
@@ -10,6 +11,7 @@ Game::Game(Font gameFont, Color gameColor)
 
 Game::~Game()
 {
+    //Faz unload de todos os sons e sprites
     Alien::unloadAliens();
     UnloadMusicStream(music);
     UnloadSound(explosionSound);
@@ -57,6 +59,7 @@ void Game::update()
 
 void Game::draw()
 {
+    //desenha os elementos do jogo
     spaceship.draw();
 
     for (auto &laser : spaceship.lasers)
@@ -101,11 +104,11 @@ void Game::handleImput()
         else if (IsKeyDown(KEY_R)) // Retorna ao menu, tornando IsInMenu Verdadeiro
         {
             isInMenu = !isInMenu;
-        }
+        } 
     }
     else
     { //Controles em Menu
-        if (!isInOptions)
+        if (!isInOptions && !isInAddPlayer)
         {
             if (IsKeyDown(KEY_S)) // Inicia o jogo, tornando IsInMenu falso
             {
@@ -119,16 +122,20 @@ void Game::handleImput()
             {
                 isInOptions = !isInOptions;
             }
+            else if (IsKeyDown(KEY_A)) // entra em options: Menu -> addPlayer
+            {
+                isInAddPlayer = !isInAddPlayer;
+            }
         }
-        else
+        else if (isInOptions)
         { //Controles no Options
             if (IsKeyDown(KEY_M)) // Retorna ao menu: Options -> menu
             {
                 isInOptions = !isInOptions;
-            } else if (IsKeyDown(KEY_ONE)) {
+            } else if (IsKeyDown(KEY_ONE)) {            
                 gameColor = BLUE;
             } else if (IsKeyDown(KEY_TWO)){
-                gameColor = RED;
+                gameColor = RED;                        //Escolhe os temas
             } else if (IsKeyDown(KEY_THREE)){
                 gameColor = GREEN;
             } else if (IsKeyDown(KEY_FOUR)){
@@ -136,6 +143,7 @@ void Game::handleImput()
             } else if (IsKeyDown(KEY_FIVE)){
                 gameColor = PURPLE;
             } else if (IsKeyDown(KEY_Q)) {
+                //Lógica para mutar o jogo (meio ruim), Trocar pra booleana para controlar frames
                 soundIsOn = !soundIsOn;
                 double currentTime = GetTime();
                 if (currentTime - lastSoundTime <= 1.5)
@@ -151,6 +159,14 @@ void Game::handleImput()
                 
             }
         }
+        else if (isInAddPlayer) //No menu de adicionar player!
+        {
+            if (IsKeyDown(KEY_M))
+            {
+                isInAddPlayer = !isInAddPlayer;
+            }
+            
+        }
     }
 }
 
@@ -161,7 +177,7 @@ void Game::drawInterface()
 
     // Desenha a caixa aonde se passa o jogo
     DrawRectangleRoundedLines({10, 10, 780, 780}, 0.18f, 20, gameColor);
-
+    
     // Desenha a linha que divide interface de jogo
     DrawLineEx({10, 730}, {790, 730}, 3, gameColor);
 
@@ -188,14 +204,15 @@ void Game::drawInterface()
 
 void Game::showMenu()
 {
-    if (!isInOptions)
+    if (!isInOptions && !isInAddPlayer)
     { // Interface do menu fora de options
         DrawTextEx(gameFont, "SPACE-INVADERS", {220, 100}, 50, 3, gameColor);
         DrawTextEx(gameFont, "S - START", {220, 400}, 34, 3, gameColor);
         DrawTextEx(gameFont, "O - OPTIONS", {220, 450}, 34, 3, gameColor);
+        // DrawTextEx(gameFont, "A - ADD PLAYER", {220, 500}, 34, 3, gameColor);
         DrawTextEx(gameFont, "E - EXIT", {220, 500}, 34, 3, gameColor);
     }
-    else
+    else if (isInOptions)
     { // Interface do menu de options
         DrawTextEx(gameFont, "SPACE-INVADERS", {220, 100}, 50, 3, gameColor);
         DrawTextEx(gameFont, "(UN)MUTE MUSIC -> Q", {400, 400}, 34, 3, gameColor);
@@ -206,6 +223,17 @@ void Game::showMenu()
         DrawTextEx(gameFont, "4 - YELLOW", {125, 560}, 34, 3, gameColor);
         DrawTextEx(gameFont, "5 - PURPLE", {125, 600}, 34, 3, gameColor);
         DrawTextEx(gameFont, "M - MENU", {100, 640}, 34, 3, gameColor);
+    } 
+    else if(isInAddPlayer)
+    {   //Interface do menu AddPlayers 
+    //INCOMPLETE
+        // DrawTextEx(gameFont, "Write your nickname (3 letters)", {100, 400}, 34, 3, gameColor);
+
+        // DrawTextEx(gameFont, "_", {100, 500}, 34, 3, gameColor);
+        // DrawTextEx(gameFont, "_", {150, 500}, 34, 3, gameColor);
+        // DrawTextEx(gameFont, "_", {200, 500}, 34, 3, gameColor);
+        
+        // DrawTextEx(gameFont, "M - MENU", {100, 640}, 34, 3, gameColor);
     }
 }
 
@@ -449,6 +477,7 @@ void Game::checkForCollision()
             }
         }
     }
+    
 }
 
 void Game::resetGame()
@@ -472,5 +501,6 @@ void Game::InitGame()
     isRunning = true;
     isInMenu = true;
     isInOptions = false;
+    isInAddPlayer = false;
     score = 0;
 }

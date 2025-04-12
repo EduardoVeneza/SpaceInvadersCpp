@@ -40,6 +40,11 @@ int Alien::getTipo() {
     return tipo;
 }
 
+void Alien::deleteAlien()
+{
+    
+}
+
 void Alien::unloadAliens()
 {  
     for (int i = 0; i < 3; i++)
